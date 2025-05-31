@@ -1,13 +1,30 @@
 import { useEffect, useState } from "react"
-const times = {
-  work: 0.1,
-  shortBreak: 0.2,
-  longBreak: 0.3,
+const defaultSettings = {
+  times: {
+    work: 25,
+    shortBreak: 5,
+    longBreak: 15,
+  },
+}
+const audioSources = [
+  "https://cdn.freesound.org/previews/468/468081_2247456-lq.mp3",
+  "https://cdn.freesound.org/previews/468/468081_2247456-lq.ogg",
+]
+
+const alarm = new Audio(
+  "https://cdn.freesound.org/previews/468/468081_2247456-lq.mp3"
+)
+const playAlarm = () => {
+  alarm.currentTime = 10
+  alarm.play()
 }
 const App = () => {
-  const [settings, setSettings] = useState({
-    times,
-  })
+  const [settings, setSettings] = useState(
+    (() => {
+      const settings = localStorage.getItem("settings")
+      return settings ? JSON.parse(settings) : defaultSettings
+    })()
+  )
   const [type, setType] = useState("work")
   const [time, setTime] = useState(settings.times[type] * 60)
   const [paused, setPaused] = useState(true)
@@ -19,7 +36,7 @@ const App = () => {
         if (prev < 0) return prev
         if (prev === 0) {
           timerEnd()
-          return times[type] * 60
+          return settings.times[type] * 60
         } else if (prev > 0) return prev - 1
       })
     }, 1000)
@@ -41,11 +58,11 @@ const App = () => {
       nextType = "work"
     }
     setTo(nextType)
-    // needs to make a sound
+    playAlarm()
   }
   const setTo = timerType => {
     setType(timerType)
-    setTime(times[timerType] * 60)
+    setTime(settings.times[timerType] * 60)
     setPaused(true)
   }
   const changeSettings = newSettings => {
@@ -53,6 +70,7 @@ const App = () => {
     if (paused) {
       setTime(newSettings.times[type] * 60)
     }
+    localStorage.setItem("settings", JSON.stringify(newSettings))
   }
   return (
     <div>
@@ -90,7 +108,7 @@ const App = () => {
         </button>
         <button
           onClick={() => {
-            setTime(minutes * 60)
+            setTime(settings.times[type] * 60)
           }}
         >
           Reset
@@ -132,7 +150,7 @@ const Settings = ({ settings, setSettings }) => {
         <label>
           Work:
           <input
-            type="text"
+            type="number"
             value={formSettings.times.work}
             onChange={e => setTime("work", e.target.value)}
           />
@@ -140,7 +158,7 @@ const Settings = ({ settings, setSettings }) => {
         <label>
           Short Break:
           <input
-            type="text"
+            type="number"
             value={formSettings.times.shortBreak}
             onChange={e => setTime("shortBreak", e.target.value)}
           />
@@ -148,7 +166,7 @@ const Settings = ({ settings, setSettings }) => {
         <label>
           Long Break:
           <input
-            type="text"
+            type="number"
             value={formSettings.times.longBreak}
             onChange={e => setTime("longBreak", e.target.value)}
           />
