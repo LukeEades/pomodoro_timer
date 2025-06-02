@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import "./stylesheets/timer.css"
+import alarmPath from "./assets/alarm.mp3"
 const defaultSettings = {
   times: {
     work: 25,
@@ -7,16 +8,8 @@ const defaultSettings = {
     longBreak: 15,
   },
 }
-const audioSources = [
-  "https://cdn.freesound.org/previews/468/468081_2247456-lq.mp3",
-  "https://cdn.freesound.org/previews/468/468081_2247456-lq.ogg",
-]
-
-const alarm = new Audio(
-  "https://cdn.freesound.org/previews/468/468081_2247456-lq.mp3"
-)
+const alarm = new Audio(alarmPath)
 const playAlarm = () => {
-  alarm.currentTime = 10
   alarm.play()
 }
 const App = () => {
@@ -86,7 +79,6 @@ const App = () => {
       />
     </div>
   )
-  //<Settings setSettings={changeSettings} settings={settings} />
 }
 const Timer = ({ type, settings, time, paused, setPaused, setTo }) => {
   return (
@@ -128,7 +120,7 @@ const Timer = ({ type, settings, time, paused, setPaused, setTo }) => {
         </button>
         <button
           onClick={() => {
-            setTime(settings.times[type] * 60)
+            setTo(type)
           }}
         >
           Reset
@@ -148,20 +140,24 @@ const Time = ({ seconds }) => {
   )
 }
 const Settings = ({ settings, setSettings }) => {
-  const [formSettings, setFormSettings] = useState({
-    ...settings,
-  })
   const [shown, setShown] = useState(false)
-  const saveSettings = e => {
-    e.preventDefault()
-    setSettings(formSettings)
+  const handleEscape = e => {
+    if (e.code === "Escape" && shown) {
+      setShown(!shown)
+    }
   }
+  useEffect(() => {
+    addEventListener("keydown", handleEscape)
+    return () => {
+      removeEventListener("keydown", handleEscape)
+    }
+  }, [shown])
   const setTime = (property, value) => {
     const temp = {
-      ...formSettings,
+      ...settings,
     }
     temp.times[property] = value
-    setFormSettings(temp)
+    setSettings(temp)
   }
   const toggleSettings = () => {
     setShown(!shown)
@@ -169,13 +165,13 @@ const Settings = ({ settings, setSettings }) => {
   return (
     <div id="settings" className={shown ? "shown" : undefined}>
       <button onClick={toggleSettings}>{shown ? "Close" : "Settings"}</button>
-      <form onSubmit={saveSettings}>
+      <div className="values">
         <label>
           <span>Work:</span>
           <input
             min={1}
             type="number"
-            value={formSettings.times.work}
+            value={settings.times.work}
             onChange={e => setTime("work", e.target.value)}
           />
         </label>
@@ -184,7 +180,7 @@ const Settings = ({ settings, setSettings }) => {
           <input
             min={1}
             type="number"
-            value={formSettings.times.shortBreak}
+            value={settings.times.shortBreak}
             onChange={e => setTime("shortBreak", e.target.value)}
           />
         </label>
@@ -193,12 +189,11 @@ const Settings = ({ settings, setSettings }) => {
           <input
             min={1}
             type="number"
-            value={formSettings.times.longBreak}
+            value={settings.times.longBreak}
             onChange={e => setTime("longBreak", e.target.value)}
           />
         </label>
-        <button type="submit">Save</button>
-      </form>
+      </div>
     </div>
   )
 }

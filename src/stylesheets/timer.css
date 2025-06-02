@@ -35,8 +35,9 @@ input:active {
   flex-direction: column;
   justify-content: center;
   gap: 1rem;
-  border-radius: 100%;
-  aspect-ratio: 1 / 1;
+  background-color: lightgrey;
+  padding: 2rem;
+  border-radius: 0.25rem;
 }
 .timer-type {
   display: flex;
@@ -69,11 +70,11 @@ input:active {
   top: 1rem;
   right: 1rem;
 }
-#settings > form {
+#settings > .values {
   display: none;
   font-size: calc(0.5vw + 1rem);
 }
-#settings > form > label {
+#settings > .values > label {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -81,11 +82,14 @@ input:active {
   flex-direction: row;
   gap: 0.25rem;
 }
+#settings input {
+  width: 2.5rem;
+}
 #settings.shown {
-  background-color: rgba(192, 192, 192, 0.5);
+  background-color: rgba(192, 192, 192, 0.75);
   height: 100%;
 }
-#settings.shown > form {
+#settings.shown > .values {
   width: fit-content;
   display: flex;
   flex-direction: column;
