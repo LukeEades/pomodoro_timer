@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import "./stylesheets/timer.css"
 const defaultSettings = {
   times: {
     work: 25,
@@ -74,11 +75,28 @@ const App = () => {
   }
   return (
     <div>
-      <nav>
+      <Settings settings={settings} setSettings={changeSettings} />
+      <Timer
+        type={type}
+        time={time}
+        settings={settings}
+        paused={paused}
+        setPaused={setPaused}
+        setTo={setTo}
+      />
+    </div>
+  )
+  //<Settings setSettings={changeSettings} settings={settings} />
+}
+const Timer = ({ type, settings, time, paused, setPaused, setTo }) => {
+  return (
+    <div className="timer">
+      <nav className="timer-type">
         <button
           onClick={() => {
             setTo("work")
           }}
+          className={type === "work" ? "selected" : undefined}
         >
           Work
         </button>
@@ -86,6 +104,7 @@ const App = () => {
           onClick={() => {
             setTo("shortBreak")
           }}
+          className={type === "shortBreak" ? "selected" : undefined}
         >
           Short Break
         </button>
@@ -93,12 +112,13 @@ const App = () => {
           onClick={() => {
             setTo("longBreak")
           }}
+          className={type === "longBreak" ? "selected" : undefined}
         >
           Long Break
         </button>
       </nav>
-      <Timer seconds={time} />
-      <nav>
+      <Time seconds={time} />
+      <nav className="timer-controls">
         <button
           onClick={() => {
             setPaused(!paused)
@@ -114,24 +134,24 @@ const App = () => {
           Reset
         </button>
       </nav>
-      <Settings setSettings={changeSettings} settings={settings} />
     </div>
   )
 }
-const Timer = ({ seconds }) => {
+const Time = ({ seconds }) => {
   const padTime = time => {
     return `${time}`.padStart(2, "0")
   }
   return (
-    <div>
+    <span className="time">
       {padTime(Math.floor(seconds / 60))}:{padTime(seconds % 60)}
-    </div>
+    </span>
   )
 }
 const Settings = ({ settings, setSettings }) => {
   const [formSettings, setFormSettings] = useState({
     ...settings,
   })
+  const [shown, setShown] = useState(false)
   const saveSettings = e => {
     e.preventDefault()
     setSettings(formSettings)
@@ -143,13 +163,17 @@ const Settings = ({ settings, setSettings }) => {
     temp.times[property] = value
     setFormSettings(temp)
   }
+  const toggleSettings = () => {
+    setShown(!shown)
+  }
   return (
-    <div>
-      <button>Settings</button>
+    <div id="settings" className={shown ? "shown" : undefined}>
+      <button onClick={toggleSettings}>{shown ? "Close" : "Settings"}</button>
       <form onSubmit={saveSettings}>
         <label>
-          Work:
+          <span>Work:</span>
           <input
+            min={1}
             type="number"
             value={formSettings.times.work}
             onChange={e => setTime("work", e.target.value)}
@@ -158,6 +182,7 @@ const Settings = ({ settings, setSettings }) => {
         <label>
           Short Break:
           <input
+            min={1}
             type="number"
             value={formSettings.times.shortBreak}
             onChange={e => setTime("shortBreak", e.target.value)}
@@ -166,6 +191,7 @@ const Settings = ({ settings, setSettings }) => {
         <label>
           Long Break:
           <input
+            min={1}
             type="number"
             value={formSettings.times.longBreak}
             onChange={e => setTime("longBreak", e.target.value)}
